@@ -73,7 +73,7 @@
   #scoreBox .val { font-size:24px; font-weight:bold; }
   #scoreBox .books { font-size:13px; color:#c9a227; margin-top:4px; }
   #questBox {
-    position:fixed; top:160px; left:20px; z-index:11;
+    position:fixed; top:70px; left:20px; z-index:11;
     background:rgba(10,5,20,.9); border:2px solid #c9a227; border-radius:10px;
     padding:12px 18px; color:#f5e6c8; font-family:Georgia,serif;
     text-shadow:1px 1px 3px #000; pointer-events:none; max-width:280px;
@@ -89,12 +89,6 @@
     padding:16px 28px; color:#e8c547; font-size:20px; font-family:Georgia,serif;
     z-index:25; display:none; text-align:center;
     box-shadow:0 0 30px rgba(201,162,39,.5);
-  }  #questBox {
-    position:fixed; top:70px; left:20px; z-index:11;
-    background:rgba(10,5,20,.9); border:2px solid #c9a227; border-radius:10px;
-    padding:12px 18px; color:#f5e6c8; font-family:Georgia,serif;
-    text-shadow:1px 1px 3px #000; pointer-events:none; max-width:280px;
-    box-shadow:0 0 20px rgba(201,162,39,.3);
   }
 </style>
 </head>
@@ -141,13 +135,13 @@
 <div id="menu">
   <h1>Мастер и Маргарита</h1>
   <h2>Платформер по бессмертному роману</h2>
-  <p>Пройдите 32 главы, сыграйте за Берлиоза, Ивана Бездомного, Маргариту, Понтия Пилата и Воланда.
+  <p>Пройдите 32 главы, сыграйте за Берлиоза, Ивана Бездомного, Маргариту, Понтия Пилата и Азазелло.
      Каждый герой обладает уникальной способностью. Собирайте книги, набирайте очки, сражайтесь с врагами, соответствующими каждой главе.
      Выполняйте задания глав и сдавайте их NPC, чтобы двигаться дальше.</p>
   <button onclick="startGame()">Начать путь</button>
   <div class="controls">
     ← → — движение &nbsp;|&nbsp; ↑ / Пробел — прыжок &nbsp;|&nbsp; Enter — атака / способность<br>
-    E — говорить с персонажем &nbsp;|&nbsp; R — перезапуск уровня &nbsp;|&nbsp; Shift — фазовый сдвиг (Воланд)
+    E — говорить с персонажем &nbsp;|&nbsp; R — перезапуск уровня &nbsp;|&nbsp; Shift — фазовый сдвиг (Азазелло)
   </div>
 </div>
 
@@ -234,11 +228,11 @@ const HEROES = {
     abilColor:"#ef4444", style:"roman",
     desc:"Прокуратор. Вызывает у врагов головную боль (AoE-урон)."
   },
-  woland: {
-    name:"Воланд", color:"#0a0a0a", accent:"#c9a227", skin:"#e0d0c0",
+  azazello: {
+    name:"Азазелло", color:"#2a0a0a", accent:"#ef4444", skin:"#e0d0c0",
     hair:"#1a1a1a", speed:3.8, jump:-13, hp:120, ability:"Фазовый сдвиг",
-    abilColor:"#a855f7", style:"tuxedo",
-    desc:"Мессир. Проходит сквозь стены и препятствия."
+    abilColor:"#a855f7", style:"demon",
+    desc:"Демон-убийца из свиты. Проходит сквозь стены и препятствия."
   }
 };
 
@@ -246,7 +240,7 @@ const LEVEL_HERO = [
   'berlioz','pilate','berlioz','bezdomny','bezdomny','bezdomny','bezdomny','bezdomny',
   'bezdomny','bezdomny','bezdomny','bezdomny','bezdomny','bezdomny','bezdomny',
   'pilate','pilate','pilate','margarita','margarita','margarita','margarita','margarita',
-  'margarita','pilate','pilate','woland','woland','woland','woland','woland','woland'
+  'margarita','pilate','pilate','azazello','azazello','azazello','azazello','azazello','azazello'
 ];
 
 const ENEMY_TYPES = {
@@ -420,162 +414,130 @@ const DIALOGS = {
    ВИЗУАЛЬНЫЕ ТЕМЫ ГЛАВ — каждая глава как сцена из фильма
    ============================================================ */
 const CHAPTER_THEMES = [
-  // 1. Патриаршие пруды — жара, трамвай, скамейки, тополя
   { id:'patriarch', skyTop:'#7a5a2a', skyBot:'#2a1505', ground:'#6a4a2a', groundTop:'#8a6a3a',
     accent:'#c9a227', fog:'rgba(200,150,60,0.10)', particles:'pollen',
     buildingStyles:['patriarch','mansion','street'], props:['tram','pond','bench','tree','lamp'],
     hasMoon:false, hasStars:true, warm:true },
-  // 2. Дворец Пилата / Лысая Гора — античность, мрамор, колонны
   { id:'pilate', skyTop:'#c97a3a', skyBot:'#3a1a0a', ground:'#b09060', groundTop:'#d0b080',
     accent:'#c9a227', fog:'rgba(255,180,80,0.12)', particles:'dust',
     buildingStyles:['palace','roman','palace'], props:['column','statue','lamp','tree'],
     hasMoon:false, hasStars:false, warm:true },
-  // 3. Седьмое доказательство — Патриаршие, закат
   { id:'proof', skyTop:'#8a3a1a', skyBot:'#1a0a05', ground:'#5a3a1a', groundTop:'#7a5a2a',
     accent:'#c9a227', fog:'rgba(180,80,30,0.12)', particles:'dust',
     buildingStyles:['patriarch','street','mansion'], props:['tram','bench','lamp','tree','pond'],
     hasMoon:false, hasStars:true, warm:true },
-  // 4. Погоня по Москве — ночные улицы, фонари
   { id:'chase', skyTop:'#1a1a3a', skyBot:'#050510', ground:'#2a2a3a', groundTop:'#3a3a4a',
     accent:'#60a5fa', fog:'rgba(40,60,120,0.14)', particles:'rain',
     buildingStyles:['street','city','mansion'], props:['lamp','bench','tram'],
     hasMoon:true, hasStars:true, warm:false },
-  // 5. Грибоедов — ресторан, колонны, люстры
   { id:'griboedov', skyTop:'#2a1a0a', skyBot:'#0a0505', ground:'#4a2a1a', groundTop:'#6a4a2a',
     accent:'#e8c547', fog:'rgba(200,150,60,0.12)', particles:'sparks',
     buildingStyles:['griboedov','mansion','griboedov'], props:['column','lamp','bench','statue'],
     hasMoon:false, hasStars:false, warm:true },
-  // 6. Шизофрения — клиника, белые стены
   { id:'clinic', skyTop:'#3a4a5a', skyBot:'#1a2a3a', ground:'#5a6a7a', groundTop:'#7a8a9a',
     accent:'#a0c0e0', fog:'rgba(200,220,255,0.10)', particles:'dust',
     buildingStyles:['clinic','city','clinic'], props:['lamp','bench','column'],
     hasMoon:false, hasStars:false, warm:false },
-  // 7. Неудачливый визит — лечебница ночью
   { id:'clinic_night', skyTop:'#1a2a3a', skyBot:'#050510', ground:'#3a4a5a', groundTop:'#4a5a6a',
     accent:'#60a5fa', fog:'rgba(40,80,140,0.14)', particles:'rain',
     buildingStyles:['clinic','city','mansion'], props:['lamp','bench'],
     hasMoon:true, hasStars:true, warm:false },
-  // 8. Поединок — крыша / ночная Москва, мистика
   { id:'duel', skyTop:'#0a0a2a', skyBot:'#000005', ground:'#1a1a2a', groundTop:'#2a2a3a',
     accent:'#a855f7', fog:'rgba(80,40,160,0.16)', particles:'sparks',
     buildingStyles:['city','mansion','city'], props:['lamp','statue','column'],
     hasMoon:true, hasStars:true, warm:false },
-  // 9. Коровьев и Бегемот — квартира №50, мистика, свечи
   { id:'koroviev', skyTop:'#1a0a2a', skyBot:'#050010', ground:'#2a1a3a', groundTop:'#3a2a4a',
     accent:'#c9a227', fog:'rgba(120,40,180,0.14)', particles:'sparks',
     buildingStyles:['mansion','city','mansion'], props:['lamp','statue','bench','column'],
     hasMoon:true, hasStars:true, warm:true },
-  // 10. Вести из Ялты — телеграф, море, пальмы
   { id:'yalta', skyTop:'#2a5a8a', skyBot:'#0a1a3a', ground:'#3a6a8a', groundTop:'#5a8aaa',
     accent:'#60a5fa', fog:'rgba(80,160,220,0.12)', particles:'dust',
     buildingStyles:['city','street','mansion'], props:['lamp','bench','tree','statue'],
     hasMoon:false, hasStars:true, warm:false },
-  // 11. Раздвоение Ивана — зеркала, двойники, клиника
   { id:'split', skyTop:'#2a1a3a', skyBot:'#0a0a1a', ground:'#3a2a4a', groundTop:'#4a3a5a',
     accent:'#c084fc', fog:'rgba(160,80,220,0.14)', particles:'sparks',
     buildingStyles:['clinic','city','mansion'], props:['lamp','statue','column'],
     hasMoon:true, hasStars:true, warm:false },
-  // 12. Чёрная магия — театр Варьете, сцена, кулисы
   { id:'varyete', skyTop:'#2a0a1a', skyBot:'#0a0005', ground:'#4a1a2a', groundTop:'#6a2a3a',
     accent:'#e8c547', fog:'rgba(200,100,60,0.14)', particles:'sparks',
     buildingStyles:['griboedov','mansion','griboedov'], props:['column','lamp','statue','bench'],
     hasMoon:false, hasStars:false, warm:true },
-  // 13. Явление героя — подвал Мастера, свечи
   { id:'master', skyTop:'#1a0a0a', skyBot:'#050000', ground:'#3a2a1a', groundTop:'#4a3a2a',
     accent:'#e8c547', fog:'rgba(200,150,60,0.12)', particles:'sparks',
     buildingStyles:['basement','mansion','basement'], props:['lamp','bench','column'],
     hasMoon:false, hasStars:false, warm:true },
-  // 14. Слава петуху! — подвал, но с проблесками
   { id:'rooster', skyTop:'#2a1a0a', skyBot:'#0a0500', ground:'#4a3a2a', groundTop:'#5a4a3a',
     accent:'#e8c547', fog:'rgba(200,150,60,0.10)', particles:'dust',
     buildingStyles:['basement','mansion','city'], props:['lamp','bench','column'],
     hasMoon:false, hasStars:false, warm:true },
-  // 15. Сон Никанора — сюрреализм, театр
   { id:'dream', skyTop:'#3a1a4a', skyBot:'#0a0510', ground:'#4a2a5a', groundTop:'#5a3a6a',
     accent:'#c084fc', fog:'rgba(180,80,220,0.14)', particles:'sparks',
     buildingStyles:['mansion','griboedov','mansion'], props:['column','statue','lamp','bench'],
     hasMoon:true, hasStars:true, warm:false },
-  // 16. Казнь на Лысой Горе — пустыня, кресты, солнце
   { id:'golgotha', skyTop:'#e8a040','skyBot':'#3a1a05', ground:'#a08050', groundTop:'#c0a070',
     accent:'#c9a227', fog:'rgba(255,200,100,0.15)', particles:'dust',
     buildingStyles:['roman','palace','roman'], props:['column','statue','tree'],
     hasMoon:false, hasStars:false, warm:true },
-  // 17. Неудачливый день — дворец, мрамор
   { id:'palace_day', skyTop:'#8a6a4a', skyBot:'#2a1a0a', ground:'#b09060', groundTop:'#d0b080',
     accent:'#c9a227', fog:'rgba(220,180,120,0.12)', particles:'dust',
     buildingStyles:['palace','roman','palace'], props:['column','statue','lamp'],
     hasMoon:false, hasStars:false, warm:true },
-  // 18. Нежеланные посетители — дворец ночью
   { id:'palace_night', skyTop:'#1a1a3a', skyBot:'#050510', ground:'#6a5a4a', groundTop:'#8a7a6a',
     accent:'#c9a227', fog:'rgba(80,80,160,0.14)', particles:'dust',
     buildingStyles:['palace','roman','palace'], props:['column','statue','lamp'],
     hasMoon:true, hasStars:true, warm:false },
-  // 19. Маргарита — особняк, Gothic, тёмный
   { id:'margarita', skyTop:'#2a1a2a', skyBot:'#0a0510', ground:'#4a2a3a', groundTop:'#5a3a4a',
     accent:'#e8c547', fog:'rgba(160,80,120,0.12)', particles:'dust',
     buildingStyles:['mansion','city','mansion'], props:['lamp','statue','bench','column'],
     hasMoon:true, hasStars:true, warm:false },
-  // 20. Крем Азазелло — ночь, мистика, красный
   { id:'cream', skyTop:'#3a0a1a', skyBot:'#0a0005', ground:'#4a1a2a', groundTop:'#5a2a3a',
     accent:'#ef4444', fog:'rgba(200,40,80,0.14)', particles:'sparks',
     buildingStyles:['mansion','city','mansion'], props:['lamp','statue','column'],
     hasMoon:true, hasStars:true, warm:false },
-  // 21. Полёт над Москвой — звёздное небо, крыши, полёт
   { id:'flight', skyTop:'#0a0a3a', skyBot:'#000010', ground:'#1a1a2a', groundTop:'#2a2a3a',
     accent:'#c084fc', fog:'rgba(80,60,180,0.12)', particles:'stars',
     buildingStyles:['city','mansion','city'], props:['lamp','statue'],
     hasMoon:true, hasStars:true, warm:false },
-  // 22. При свечах — подвал, свечи, тепло
   { id:'candles', skyTop:'#2a1a0a', skyBot:'#0a0500', ground:'#4a3a2a', groundTop:'#5a4a3a',
     accent:'#e8c547', fog:'rgba(220,180,80,0.12)', particles:'sparks',
     buildingStyles:['basement','mansion','basement'], props:['lamp','bench','column'],
     hasMoon:false, hasStars:false, warm:true },
-  // 23. Великий бал у сатаны — бальный зал, золото, роскошь
   { id:'ball', skyTop:'#1a0a2a', skyBot:'#050010', ground:'#3a1a4a', groundTop:'#4a2a5a',
     accent:'#e8c547', fog:'rgba(200,150,60,0.16)', particles:'sparks',
     buildingStyles:['ball','palace','ball'], props:['column','statue','lamp','bench'],
     hasMoon:true, hasStars:true, warm:true },
-  // 24. Извлечение мастера — клиника/подвал
   { id:'extract', skyTop:'#1a1a2a', skyBot:'#050510', ground:'#3a3a4a', groundTop:'#4a4a5a',
     accent:'#c084fc', fog:'rgba(120,80,180,0.12)', particles:'dust',
     buildingStyles:['clinic','basement','mansion'], props:['lamp','bench','column'],
     hasMoon:false, hasStars:true, warm:false },
-  // 25. Спасти Иуду — дворец, ночь
   { id:'judas', skyTop:'#1a1a3a', skyBot:'#050510', ground:'#6a5a4a', groundTop:'#8a7a6a',
     accent:'#c9a227', fog:'rgba(80,80,160,0.14)', particles:'dust',
     buildingStyles:['palace','roman','palace'], props:['column','statue','lamp'],
     hasMoon:true, hasStars:true, warm:false },
-  // 26. Погребение — пустыня, закат, кресты
   { id:'burial', skyTop:'#8a4a2a', skyBot:'#1a0a05', ground:'#8a6a4a', groundTop:'#a08060',
     accent:'#c9a227', fog:'rgba(200,120,60,0.12)', particles:'dust',
     buildingStyles:['roman','palace','roman'], props:['column','statue','tree'],
     hasMoon:false, hasStars:false, warm:true },
-  // 27. Конец квартиры №50 — мистика, огонь
   { id:'end50', skyTop:'#3a1a0a', skyBot:'#0a0000', ground:'#4a2a1a', groundTop:'#5a3a2a',
     accent:'#ef4444', fog:'rgba(220,80,40,0.16)', particles:'embers',
     buildingStyles:['mansion','city','mansion'], props:['lamp','statue','column'],
     hasMoon:true, hasStars:true, warm:true },
-  // 28. Последние приключения — Москва, огонь, дым
   { id:'fire', skyTop:'#3a0a0a', skyBot:'#0a0000', ground:'#4a1a1a', groundTop:'#5a2a2a',
     accent:'#ef4444', fog:'rgba(220,60,20,0.18)', particles:'embers',
     buildingStyles:['city','mansion','city'], props:['lamp','statue','column'],
     hasMoon:false, hasStars:false, warm:true },
-  // 29. Судьба определена — мистика, звёзды, покой
   { id:'fate', skyTop:'#1a0a2a', skyBot:'#000005', ground:'#2a1a3a', groundTop:'#3a2a4a',
     accent:'#a855f7', fog:'rgba(120,60,200,0.14)', particles:'stars',
     buildingStyles:['mansion','city','mansion'], props:['lamp','statue','column'],
     hasMoon:true, hasStars:true, warm:false },
-  // 30. Пора! Пора! — ночное небо, уход
   { id:'time', skyTop:'#0a0a2a', skyBot:'#000005', ground:'#1a1a2a', groundTop:'#2a2a3a',
     accent:'#a855f7', fog:'rgba(80,40,160,0.14)', particles:'stars',
     buildingStyles:['city','mansion','city'], props:['lamp','statue'],
     hasMoon:true, hasStars:true, warm:false },
-  // 31. На Воробьёвых горах — рассвет, панорама
   { id:'sparrow', skyTop:'#e8a060', skyBot:'#2a1a3a', ground:'#4a3a2a', groundTop:'#6a5a4a',
     accent:'#c9a227', fog:'rgba(255,180,100,0.12)', particles:'dust',
     buildingStyles:['sparrow','city','mansion'], props:['lamp','tree','statue','bench'],
     hasMoon:false, hasStars:false, warm:true },
-  // 32. Прощение и вечный приют — свет, покой, вечность
   { id:'eternal', skyTop:'#3a4a6a', skyBot:'#1a1a2a', ground:'#5a5a6a', groundTop:'#7a7a8a',
     accent:'#e8c547', fog:'rgba(200,200,255,0.14)', particles:'stars',
     buildingStyles:['eternal','palace','eternal'], props:['column','statue','lamp','tree'],
@@ -600,6 +562,7 @@ let state = {
   quest:null, questNPC:null, killsThisLevel:0,
   questTurnedIn:false, showHint:false, hintTimer:0, hintText:"",
   bookRespawnQueue:[],
+  enemyRespawnQueue: [],
   decor: [],
   theme: null,
   ambientParticles: []
@@ -651,7 +614,7 @@ function updateQuestProgress(type, amount){
 
 function updateQuestUI(){
   const q = state.quest;
-  if (!q){ 
+  if (!q){
     document.getElementById('qTitle').textContent = "Задание главы";
     document.getElementById('qDesc').textContent = "Поговорите с NPC (E), чтобы получить задание.";
     document.getElementById('qProg').textContent = "";
@@ -682,13 +645,11 @@ function updateQuestUI(){
   }
 }
 
-
 function updateScoreUI(){
   document.getElementById('scoreVal').textContent = state.score;
   document.getElementById('booksInfo').textContent =
     `Книги: ${state.booksCollected} / ${state.booksTotal}`;
 }
-
 
 function showHint(text, duration){
   const box = document.getElementById('hintBox');
@@ -741,6 +702,62 @@ function processBookRespawns(dt){
   state.bookRespawnQueue = state.bookRespawnQueue.filter(e => !e.respawned);
 }
 
+/* ---------- Респаун врагов ---------- */
+function scheduleEnemyRespawn(enemy){
+  if (enemy.boss) return;
+  state.enemyRespawnQueue.push({
+    timer: 8 + Math.random() * 7,
+    typeKey: enemy.typeKey,
+    x: enemy.x,
+    y: enemy.y,
+    patrolLeft: enemy.patrolLeft,
+    patrolRight: enemy.patrolRight,
+    respawned: false
+  });
+}
+
+function processEnemyRespawns(dt){
+  for (const entry of state.enemyRespawnQueue){
+    if (entry.respawned) continue;
+    entry.timer -= dt;
+    if (entry.timer > 0) continue;
+
+    const h = state.hero;
+    if (h && Math.abs(h.x - entry.x) < 220){
+      entry.timer = 2;
+      continue;
+    }
+
+    const t = ENEMY_TYPES[entry.typeKey];
+    if (!t){ entry.respawned = true; continue; }
+
+    const lvlScale = 1 + state.level * 0.06;
+    state.enemies.push({
+      x: entry.x, y: entry.y, vx:0, vy:0, w:t.w, h:t.h,
+      hp: Math.floor(t.hp * lvlScale), maxHp: Math.floor(t.hp * lvlScale),
+      speed: t.speed * (1 + state.level * 0.02),
+      vision: t.vision + state.level * 6,
+      dir: Math.random() > 0.5 ? 1 : -1,
+      patrolLeft: entry.patrolLeft, patrolRight: entry.patrolRight,
+      state:'patrol', anim:0, hurt:0, slow:0, stun:0, onGround:false,
+      name: t.name, color: t.color, accent: t.accent, style: t.style,
+      pattern: t.pattern, flying: t.flying || false, damage: t.damage,
+      typeKey: entry.typeKey, teleportTimer: 0
+    });
+
+    for (let i = 0; i < 12; i++){
+      state.particles.push({
+        x: entry.x + t.w/2, y: entry.y + t.h/2,
+        vx:(Math.random()-0.5)*6, vy:(Math.random()-0.5)*6,
+        life:35, maxLife:35, color:"#c9a227", size:3
+      });
+    }
+
+    entry.respawned = true;
+  }
+  state.enemyRespawnQueue = state.enemyRespawnQueue.filter(e => !e.respawned);
+}
+
 /* ---------- Генерация уровня ---------- */
 function generateLevel(levelNum){
   const heroKey = LEVEL_HERO[levelNum];
@@ -759,11 +776,13 @@ function generateLevel(levelNum){
   state.dialogActive = false; state.dialogQueue = []; state.levelComplete = false;
   state.flying = false; state.phasing = false; state.abilityCooldown = 0;
   state.killsThisLevel = 0;
-  state.questTurnedIn = false;  const questBox = document.getElementById('questBox');
+  state.questTurnedIn = false;
+  const questBox = document.getElementById('questBox');
   questBox.style.transition = 'none';
   questBox.style.opacity = '1';
   state.showHint = false; state.hintTimer = 0;
   state.bookRespawnQueue = [];
+  state.enemyRespawnQueue = [];
   state.decor = [];
   state.ambientParticles = [];
   document.getElementById('hintBox').style.display = 'none';
@@ -854,6 +873,7 @@ function generateLevel(levelNum){
   }
 
   /* ---------- 4. СТЕНЫ ---------- */
+   /* ---------- 4. СТЕНЫ ---------- */
   const wallCount = 3 + Math.floor(levelNum / 5);
   let wallPlaced = 0;
   let wallAttempts = 0;
@@ -862,40 +882,22 @@ function generateLevel(levelNum){
     const wx = 700 + rng() * (levelWidth - 1400);
     const hasGround = groundSegments.some(g => wx + 32 > g.x && wx < g.x + g.w);
     if (!hasGround) continue;
-    const wallH = rng() > 0.5 ? 80 + rng()*50 : 180;
+
+    // Низкие стены — легко перепрыгиваются любым героем
+    const wallH = 40 + rng() * 30; // 40–70 px
     const wallY = GROUND_Y - wallH;
+
     let ok = true;
     for (const p of placed){
       if (rectsOverlap(wx - 8, wallY - 8, 32 + 16, wallH + 16, p.x, p.y, p.w, p.h)){ ok = false; break; }
     }
     if (!ok) continue;
 
-    if (wallH > 150){
-      const leftPlat = { x: wx - 100, y: wallY - 70, w: 90, h: 20, type:'platform' };
-      const rightPlat = { x: wx + 42, y: wallY - 70, w: 90, h: 20, type:'platform' };
-      let canPlace = true;
-      for (const p of placed){
-        if (rectsOverlap(leftPlat.x - 6, leftPlat.y - 6, leftPlat.w + 12, leftPlat.h + 12, p.x, p.y, p.w, p.h)) canPlace = false;
-        if (rectsOverlap(rightPlat.x - 6, rightPlat.y - 6, rightPlat.w + 12, rightPlat.h + 12, p.x, p.y, p.w, p.h)) canPlace = false;
-      }
-      if (leftPlat.y + leftPlat.h >= GROUND_Y || rightPlat.y + rightPlat.h >= GROUND_Y) canPlace = false;
-
-      if (canPlace){
-        state.platforms.push({ x:wx, y:wallY, w:32, h:wallH, type:'wall' });
-        state.platforms.push(leftPlat);
-        state.platforms.push(rightPlat);
-        placed.push({ x:wx, y:wallY, w:32, h:wallH });
-        placed.push(leftPlat);
-        placed.push(rightPlat);
-        wallPlaced++;
-      }
-    } else {
-      state.platforms.push({ x:wx, y:wallY, w:32, h:wallH, type:'wall' });
-      placed.push({ x:wx, y:wallY, w:32, h:wallH });
-      wallPlaced++;
-    }
+    state.platforms.push({ x:wx, y:wallY, w:32, h:wallH, type:'wall' });
+    placed.push({ x:wx, y:wallY, w:32, h:wallH });
+    wallPlaced++;
   }
-
+  /* ---------- 5. ЯМЫ ---------- */
   /* ---------- 5. ЯМЫ ---------- */
   const pitZones = [];
   if (levelNum % 2 === 0){
@@ -904,7 +906,8 @@ function generateLevel(levelNum){
     while (pitZones.length < pitTarget && pitAttempts < pitTarget * 20){
       pitAttempts++;
       const pitX = 900 + rng() * (levelWidth - 1600);
-      const pitW = 100;
+      const pitW = 60 + rng() * 30; // 60–90 px вместо фиксированных 100
+
       let hasBridge = false;
       for (const p of placed){
         if (p.type === 'wall') continue;
@@ -914,11 +917,14 @@ function generateLevel(levelNum){
         }
       }
       if (!hasBridge) continue;
+
+      // Увеличиваем минимальную дистанцию между ямами, чтобы они не сливались
       let overlaps = false;
       for (const z of pitZones){
-        if (pitX < z.x + z.w && pitX + pitW > z.x){ overlaps = true; break; }
+        if (pitX < z.x + z.w + 120 && pitX + pitW > z.x - 120){ overlaps = true; break; }
       }
       if (overlaps) continue;
+
       pitZones.push({ x:pitX, w:pitW });
     }
   }
@@ -1069,7 +1075,6 @@ function generateDecor(levelNum, levelWidth, GROUND_Y, rng){
   state.decor = [];
   const theme = state.theme;
 
-  // --- Здания на заднем плане ---
   const buildingCount = 10 + Math.floor(rng() * 8);
   for (let i = 0; i < buildingCount; i++){
     const bw = 140 + rng() * 220;
@@ -1087,7 +1092,6 @@ function generateDecor(levelNum, levelWidth, GROUND_Y, rng){
     });
   }
 
-  // --- Фонари ---
   const lampCount = 6 + Math.floor(rng() * 8);
   for (let i = 0; i < lampCount; i++){
     state.decor.push({
@@ -1099,7 +1103,6 @@ function generateDecor(levelNum, levelWidth, GROUND_Y, rng){
     });
   }
 
-  // --- Деревья ---
   const treeCount = 4 + Math.floor(rng() * 8);
   for (let i = 0; i < treeCount; i++){
     state.decor.push({
@@ -1111,7 +1114,6 @@ function generateDecor(levelNum, levelWidth, GROUND_Y, rng){
     });
   }
 
-  // --- Скамейки ---
   const benchCount = 3 + Math.floor(rng() * 5);
   for (let i = 0; i < benchCount; i++){
     state.decor.push({
@@ -1123,7 +1125,6 @@ function generateDecor(levelNum, levelWidth, GROUND_Y, rng){
     });
   }
 
-  // --- Колонны (античность, дворцы) ---
   if (theme.id === 'pilate' || theme.id === 'golgotha' || theme.id === 'palace_day' ||
       theme.id === 'palace_night' || theme.id === 'judas' || theme.id === 'burial' ||
       theme.id === 'ball' || theme.id === 'eternal'){
@@ -1140,7 +1141,6 @@ function generateDecor(levelNum, levelWidth, GROUND_Y, rng){
     }
   }
 
-  // --- Статуи (дворцы, парки, мистика) ---
   if (theme.id === 'pilate' || theme.id === 'griboedov' || theme.id === 'duel' ||
       theme.id === 'koroviev' || theme.id === 'ball' || theme.id === 'eternal' ||
       theme.id === 'margarita'){
@@ -1156,7 +1156,6 @@ function generateDecor(levelNum, levelWidth, GROUND_Y, rng){
     }
   }
 
-  // --- Трамвайные пути (Патриаршие, погоня) ---
   if (theme.id === 'patriarch' || theme.id === 'proof' || theme.id === 'chase'){
     for (let i = 0; i < 3; i++){
       state.decor.push({
@@ -1169,7 +1168,6 @@ function generateDecor(levelNum, levelWidth, GROUND_Y, rng){
     }
   }
 
-  // --- Пруд (Патриаршие) ---
   if (theme.id === 'patriarch' || theme.id === 'proof'){
     state.decor.push({
       type:'pond',
@@ -1183,7 +1181,6 @@ function generateDecor(levelNum, levelWidth, GROUND_Y, rng){
     });
   }
 
-  // --- Костры / огонь (пожар Москвы) ---
   if (theme.id === 'end50' || theme.id === 'fire'){
     const fireCount = 4 + Math.floor(rng() * 4);
     for (let i = 0; i < fireCount; i++){
@@ -1196,7 +1193,6 @@ function generateDecor(levelNum, levelWidth, GROUND_Y, rng){
     }
   }
 
-  // --- Могилы / кресты (Голгофа, погребение) ---
   if (theme.id === 'golgotha' || theme.id === 'burial'){
     const crossCount = 5 + Math.floor(rng() * 5);
     for (let i = 0; i < crossCount; i++){
@@ -1210,7 +1206,6 @@ function generateDecor(levelNum, levelWidth, GROUND_Y, rng){
     }
   }
 
-  // --- Звёзды / планеты (полёт, судьба, вечность) ---
   if (theme.id === 'flight' || theme.id === 'fate' || theme.id === 'time' || theme.id === 'eternal'){
     for (let i = 0; i < 20; i++){
       state.decor.push({
@@ -1223,7 +1218,6 @@ function generateDecor(levelNum, levelWidth, GROUND_Y, rng){
     }
   }
 
-  // --- Мистические свечи (бал, свечи, подвал) ---
   if (theme.id === 'candles' || theme.id === 'ball' || theme.id === 'master' ||
       theme.id === 'koroviev' || theme.id === 'rooster'){
     const candleCount = 6 + Math.floor(rng() * 6);
@@ -1319,7 +1313,6 @@ function interactWithNPC(){
       {who:q.npcName, text:`Ты справился. Иди дальше — путь открыт.`}
     ], q.npcName);
 
-    // Через 3 секунды скрываем панель квестов
     setTimeout(() => {
       const box = document.getElementById('hintBox');
       box.style.transition = 'opacity 0.8s';
@@ -1353,7 +1346,7 @@ function updateHero(dt){
   if (state.dialogActive || state.levelComplete) return;
   const h = state.hero, d = state.heroData;
 
-  state.phasing = (d.name === "Воланд" && keys['ShiftLeft']);
+  state.phasing = ((d.name === "Воланд" || d.name === "Азазелло") && keys['ShiftLeft']);
 
   let moveSpeed = d.speed;
   if (state.flying) moveSpeed *= 1.6;
@@ -1457,7 +1450,6 @@ function useAbility(){
     if (state.mana < 30) return;
     state.mana -= 30;
 
-    // Радиус действия "чтения стихов"
     const radius = 280;
     let totalDamage = 0;
 
@@ -1474,7 +1466,6 @@ function useAbility(){
       e.stun = 30;
       totalDamage += dmg;
 
-      // Волна частиц вокруг врага
       for (let i = 0; i < 10; i++){
         state.particles.push({
           x:e.x + e.w/2, y:e.y + e.h/2,
@@ -1484,12 +1475,10 @@ function useAbility(){
       }
     }
 
-    // Вампиризм: возвращаем здоровье в виде части нанесённого урона
     if (totalDamage > 0){
       const heal = Math.min(60, Math.floor(totalDamage * 0.4));
       state.hp = Math.min(state.maxHp, state.hp + heal);
 
-      // Цифра/вспышка исцеления над героем
       for (let i = 0; i < 15; i++){
         state.particles.push({
           x:h.x + h.w/2 + (Math.random()-0.5)*20,
@@ -1499,7 +1488,6 @@ function useAbility(){
         });
       }
     } else {
-      // Если врагов рядом нет — слабое самоисцеление
       state.hp = Math.min(state.maxHp, state.hp + 15);
       for (let i = 0; i < 12; i++){
         state.particles.push({
@@ -1535,7 +1523,7 @@ function useAbility(){
     }
     state.screenShake = 12;
   }
-  else if (d.name === "Воланд"){
+  else if (d.name === "Воланд" || d.name === "Азазелло"){
     state.phasing = !state.phasing;
     state.hero.phasing = state.phasing;
   }
@@ -1632,6 +1620,12 @@ function updateEnemies(dt){
       }
     }
     e.anim += dt * 4;
+  }
+
+  // Респаун убитых
+  const killed = state.enemies.filter(e => e.hp <= 0);
+  for (const e of killed){
+    scheduleEnemyRespawn(e);
   }
   state.enemies = state.enemies.filter(e => e.hp > 0);
 }
@@ -1738,7 +1732,6 @@ function drawBackground(){
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, H);
 
-  // Луна
   if (t && t.hasMoon){
     const moonX = W * 0.8 - state.cameraX * 0.05;
     const moonY = 100;
@@ -1751,7 +1744,6 @@ function drawBackground(){
     ctx.restore();
   }
 
-  // Солнце для тёплых тем
   if (t && t.warm && !t.hasMoon){
     const sunX = W * 0.7 - state.cameraX * 0.04;
     const sunY = H * 0.35;
@@ -1765,7 +1757,6 @@ function drawBackground(){
     ctx.restore();
   }
 
-  // Звёзды
   if (!t || t.hasStars){
     ctx.fillStyle = 'rgba(245,230,200,0.6)';
     for (let i = 0; i < 70; i++){
@@ -1778,14 +1769,13 @@ function drawBackground(){
     ctx.globalAlpha = 1;
   }
 
-  // Туман / атмосфера
   if (t && t.fog){
     ctx.fillStyle = t.fog;
     ctx.fillRect(0, 0, W, H);
   }
 }
 
-/* ---------- ДЕКОРАЦИИ ПОД ТЕМУ (дома, фонари, деревья, колонны...) ---------- */
+/* ---------- ДЕКОРАЦИИ ПОД ТЕМУ ---------- */
 function drawDecor(){
   const t = state.theme;
   for (const d of state.decor){
@@ -1867,7 +1857,6 @@ function drawBuilding(d, t){
   ctx.fillStyle = baseColor;
   ctx.fillRect(d.x, d.y, d.w, d.h);
 
-  // Окна
   for (let f = 0; f < d.floors; f++){
     for (let w = 0; w < d.windows; w++){
       const wx = d.x + 10 + w * (d.w - 20) / d.windows + 5;
@@ -1882,11 +1871,9 @@ function drawBuilding(d, t){
     }
   }
 
-  // Крыша
   ctx.fillStyle = '#0a0a0a';
   ctx.fillRect(d.x - 5, d.y - 5, d.w + 10, 8);
 
-  // Детали
   if (d.style === 'griboedov'){
     ctx.fillStyle = '#4a3a2a';
     for (let c = 0; c < 4; c++){
@@ -1920,14 +1907,12 @@ function drawBuilding(d, t){
       ctx.arc(wx + 6, d.y + 25, 11, Math.PI, 0);
       ctx.fill();
     }
-    // Золото на крыше
     ctx.fillStyle = '#c9a227';
     ctx.fillRect(d.x, d.y - 8, d.w, 4);
   }
   if (d.style === 'clinic'){
     ctx.fillStyle = 'rgba(200,220,255,0.10)';
     ctx.fillRect(d.x, d.y, d.w, d.h * 0.3);
-    // Крест
     ctx.fillStyle = '#a0c0e0';
     ctx.fillRect(d.x + d.w/2 - 2, d.y + 5, 4, 14);
     ctx.fillRect(d.x + d.w/2 - 7, d.y + 10, 14, 4);
@@ -1937,7 +1922,6 @@ function drawBuilding(d, t){
     ctx.fillRect(d.x, d.y + d.h * 0.6, d.w, d.h * 0.4);
   }
   if (d.style === 'eternal'){
-    // Светящееся окно
     ctx.fillStyle = 'rgba(255,240,200,0.15)';
     ctx.fillRect(d.x + d.w/4, d.y + d.h/4, d.w/2, d.h/2);
   }
@@ -1954,7 +1938,6 @@ function drawLamp(d){
   ctx.beginPath();
   ctx.arc(d.x + 2, d.y - 5, 28, 0, Math.PI * 2);
   ctx.fill();
-  // Источник света
   ctx.fillStyle = 'rgba(255,220,140,0.6)';
   ctx.beginPath();
   ctx.arc(d.x + 2, d.y - 5, 3, 0, Math.PI * 2);
@@ -1989,13 +1972,10 @@ function drawBench(d){
 function drawColumn(d, t){
   ctx.fillStyle = '#5a4a3a';
   ctx.fillRect(d.x, d.y, d.w, d.h);
-  // База
   ctx.fillStyle = '#6a5a4a';
   ctx.fillRect(d.x - 4, d.y + d.h - 12, d.w + 8, 12);
-  // Капитель
   ctx.fillStyle = '#6a5a4a';
   ctx.fillRect(d.x - 4, d.y, d.w + 8, 10);
-  // Каннелюры
   ctx.strokeStyle = 'rgba(0,0,0,0.25)';
   ctx.lineWidth = 1;
   for (let i = 0; i < 3; i++){
@@ -2004,7 +1984,6 @@ function drawColumn(d, t){
     ctx.lineTo(d.x + 4 + i * (d.w - 8) / 2, d.y + d.h - 12);
     ctx.stroke();
   }
-  // Тень
   ctx.fillStyle = 'rgba(0,0,0,0.3)';
   ctx.beginPath();
   ctx.ellipse(d.x + d.w/2, d.y + d.h, d.w + 10, 5, 0, 0, Math.PI*2);
@@ -2016,19 +1995,16 @@ function drawStatue(d, t){
   ctx.beginPath();
   ctx.ellipse(d.x, d.y + d.h, 22, 5, 0, 0, Math.PI*2);
   ctx.fill();
-  // Постамент
   ctx.fillStyle = '#4a4a4a';
   ctx.fillRect(d.x - 14, d.y + d.h - 18, 28, 18);
   ctx.fillStyle = '#5a5a5a';
   ctx.fillRect(d.x - 18, d.y + d.h - 6, 36, 6);
-  // Фигура
   const statueColor = t && t.id === 'pilate' ? '#d0c0a0' : '#8a8a8a';
   ctx.fillStyle = statueColor;
   ctx.beginPath();
   ctx.arc(d.x, d.y + d.h - 30, 8, 0, Math.PI*2);
   ctx.fill();
   ctx.fillRect(d.x - 6, d.y + d.h - 26, 12, 12);
-  // Рука
   ctx.fillRect(d.x + 5, d.y + d.h - 22, 4, 10);
 }
 
@@ -2044,7 +2020,6 @@ function drawFire(d){
   ctx.beginPath();
   ctx.arc(d.x, d.y + 10, 60, 0, Math.PI * 2);
   ctx.fill();
-  // Пламя
   ctx.fillStyle = '#ffdd66';
   ctx.beginPath();
   ctx.moveTo(d.x - 10, d.y + 20);
@@ -2068,7 +2043,6 @@ function drawCross(d){
 function drawCandle(d){
   ctx.fillStyle = '#e8d8a8';
   ctx.fillRect(d.x - 2, d.y + d.h - 18, 4, 18);
-  // Пламя
   const flicker = Math.sin(state.time * 10 + d.seed * 20) * 1.5;
   ctx.fillStyle = 'rgba(255,220,140,0.5)';
   ctx.beginPath();
@@ -2085,15 +2059,12 @@ function drawPlatforms(){
   for (const p of state.platforms){
     if (p.x + p.w < state.cameraX - 100 || p.x > state.cameraX + W + 100) continue;
     if (p.type === 'ground'){
-      // Земля — цвет зависит от темы
       const groundCol = t ? t.ground : '#2a1f1a';
       const groundTopCol = t ? t.groundTop : '#4a3a2a';
       ctx.fillStyle = groundCol;
       ctx.fillRect(p.x, p.y, p.w, p.h);
-      // Верхний слой
       ctx.fillStyle = groundTopCol;
       ctx.fillRect(p.x, p.y, p.w, 8);
-      // Текстура
       ctx.fillStyle = 'rgba(0,0,0,0.3)';
       for (let i = 0; i < p.w; i += 25){
         ctx.fillRect(p.x + i, p.y + 10 + (i % 3) * 12, 18, 6);
@@ -2283,9 +2254,6 @@ function drawHero(){
 }
 
 /* ============================================================
-   ГУМАНОИД
-   ============================================================ */
-/* ============================================================
    ГУМАНОИД — с уникальными силуэтами для каждого типа
    ============================================================ */
 function drawHumanoid(x, y, w, h, color, accent, walkOffset, facing, attacking, type, style, style2, hairColor){
@@ -2308,9 +2276,8 @@ function drawHumanoid(x, y, w, h, color, accent, walkOffset, facing, attacking, 
   ctx.ellipse(0, 3, w * 0.55, 5, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // ---- НОГИ (у многих типов свои) ----
+  // ---- НОГИ ----
   if (st === 'ghost'){
-    // Призрак — вместо ног волнистый шлейф
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.moveTo(-10*S, -legH);
@@ -2323,7 +2290,6 @@ function drawHumanoid(x, y, w, h, color, accent, walkOffset, facing, attacking, 
     ctx.closePath();
     ctx.fill();
   } else if (st === 'dark'){
-    // Тёмная сила — рваный низ
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.moveTo(-11*S, -legH - 4*S);
@@ -2336,7 +2302,6 @@ function drawHumanoid(x, y, w, h, color, accent, walkOffset, facing, attacking, 
     ctx.closePath();
     ctx.fill();
   } else if (st === 'cat'){
-    // Кот — лапы
     ctx.fillStyle = '#1a1a1a';
     ctx.fillRect(-7*S + walkOffset*0.6, -legH, 5*S, legH);
     ctx.fillRect(2*S - walkOffset*0.6, -legH, 5*S, legH);
@@ -2345,7 +2310,6 @@ function drawHumanoid(x, y, w, h, color, accent, walkOffset, facing, attacking, 
     ctx.ellipse(-4.5*S + walkOffset*0.6, -1*S, 4*S, 2*S, 0, 0, Math.PI*2);
     ctx.ellipse(4.5*S - walkOffset*0.6, -1*S, 4*S, 2*S, 0, 0, Math.PI*2);
     ctx.fill();
-    // Хвост
     ctx.strokeStyle = color;
     ctx.lineWidth = 3*S;
     ctx.lineCap = 'round';
@@ -2354,7 +2318,6 @@ function drawHumanoid(x, y, w, h, color, accent, walkOffset, facing, attacking, 
     ctx.quadraticCurveTo(-20*S, -legH - 10*S + Math.sin(state.time*5)*5*S, -14*S, -legH - 18*S);
     ctx.stroke();
   } else if (st === 'rider'){
-    // Всадник — сапоги и плащ
     ctx.fillStyle = '#1a0a0a';
     ctx.fillRect(-7*S + walkOffset*0.6, -legH, 6*S, legH);
     ctx.fillRect(1*S - walkOffset*0.6, -legH, 6*S, legH);
@@ -2362,7 +2325,6 @@ function drawHumanoid(x, y, w, h, color, accent, walkOffset, facing, attacking, 
     ctx.fillRect(-8*S + walkOffset*0.6, -3*S, 8*S, 5*S);
     ctx.fillRect(0*S - walkOffset*0.6, -3*S, 8*S, 5*S);
   } else if (st === 'demon'){
-    // Демон — копыта
     ctx.fillStyle = '#2a0a0a';
     ctx.fillRect(-7*S + walkOffset*0.6, -legH, 5*S, legH);
     ctx.fillRect(2*S - walkOffset*0.6, -legH, 5*S, legH);
@@ -2380,7 +2342,6 @@ function drawHumanoid(x, y, w, h, color, accent, walkOffset, facing, attacking, 
     ctx.closePath();
     ctx.fill();
   } else {
-    // Обычные ноги
     const legColor = (st === 'roman' || st === 'legionary') ? '#c9b090' : '#2a2a35';
     ctx.fillStyle = legColor;
     ctx.fillRect(-7*S + walkOffset*0.6, -legH, 6*S, legH);
@@ -2390,7 +2351,7 @@ function drawHumanoid(x, y, w, h, color, accent, walkOffset, facing, attacking, 
     ctx.fillRect(0*S - walkOffset*0.6, -2*S, 8*S, 4*S);
   }
 
-  // ---- ТОРС (базовый, если у стиля нет своей формы) ----
+  // ---- ТОРС ----
   if (st !== 'ghost' && st !== 'dark' && st !== 'cat'){
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -2406,7 +2367,6 @@ function drawHumanoid(x, y, w, h, color, accent, walkOffset, facing, attacking, 
 
   // ---- РУКИ ----
   if (st === 'ghost' || st === 'dark'){
-    // Руки-щупальца
     ctx.strokeStyle = color;
     ctx.lineWidth = 4*S;
     ctx.lineCap = 'round';
@@ -2458,13 +2418,11 @@ function drawHumanoid(x, y, w, h, color, accent, walkOffset, facing, attacking, 
   const headY = -legH - bodyH - headR - 1*S;
 
   if (st === 'cat'){
-    // Кошачья голова
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(0, headY, headR + 1*S, 0, Math.PI * 2);
     ctx.fill();
   } else if (st === 'ghost' || st === 'dark'){
-    // Голова-капюшон
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(0, headY, headR + 1*S, 0, Math.PI * 2);
@@ -2485,7 +2443,6 @@ function drawHumanoid(x, y, w, h, color, accent, walkOffset, facing, attacking, 
   // ---- ГЛАЗА ----
   const eyeY = headY - 1*S;
   if (st === 'ghost' || st === 'dark'){
-    // Светящиеся глаза
     const glow = 0.6 + Math.sin(state.time*4)*0.4;
     ctx.fillStyle = accent;
     ctx.globalAlpha = glow;
@@ -2495,7 +2452,6 @@ function drawHumanoid(x, y, w, h, color, accent, walkOffset, facing, attacking, 
     ctx.fill();
     ctx.globalAlpha = 1;
   } else if (st === 'demon'){
-    // Красные глаза
     ctx.fillStyle = '#ff2020';
     ctx.beginPath();
     ctx.arc(headR*0.4, eyeY, 2*S, 0, Math.PI*2);
@@ -2514,7 +2470,6 @@ function drawHumanoid(x, y, w, h, color, accent, walkOffset, facing, attacking, 
     ctx.fill();
   }
 
-  // Брови
   if (st !== 'ghost' && st !== 'dark' && st !== 'cat'){
     ctx.strokeStyle = hair;
     ctx.lineWidth = 1.5*S;
@@ -2526,7 +2481,6 @@ function drawHumanoid(x, y, w, h, color, accent, walkOffset, facing, attacking, 
     ctx.stroke();
   }
 
-  // Нос
   if (st !== 'ghost' && st !== 'dark'){
     ctx.strokeStyle = skinDark;
     ctx.lineWidth = 1.2*S;
@@ -2537,12 +2491,10 @@ function drawHumanoid(x, y, w, h, color, accent, walkOffset, facing, attacking, 
     ctx.stroke();
   }
 
-  // Рот
   ctx.strokeStyle = '#8b3a3a';
   ctx.lineWidth = 1.2*S;
   ctx.beginPath();
   if (st === 'demon' || st === 'dark'){
-    // Клыки
     ctx.fillStyle = '#fff';
     ctx.beginPath();
     ctx.moveTo(-2*S, headY + headR*0.5);
@@ -2646,7 +2598,6 @@ function drawTorsoDetails(st, S, legH, bodyH, color, accent, skin){
     }
   }
   else if (st === 'roman' || st === 'legionary'){
-    // Туника
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.moveTo(-10*S, topY + 2*S);
@@ -2655,14 +2606,12 @@ function drawTorsoDetails(st, S, legH, bodyH, color, accent, skin){
     ctx.lineTo(-11*S, botY);
     ctx.closePath();
     ctx.fill();
-    // Пояс
     ctx.fillStyle = '#8b6914';
     ctx.fillRect(-10*S, botY - 4*S, 20*S, 3*S);
     ctx.fillStyle = '#c9a227';
     for (let i = -3; i <= 3; i++){
       ctx.fillRect(i*2.5*S - 1*S, botY - 4*S, 2*S, 3*S);
     }
-    // Плащ
     if (st === 'roman'){
       ctx.fillStyle = 'rgba(139,0,0,0.6)';
       ctx.beginPath();
@@ -2673,7 +2622,6 @@ function drawTorsoDetails(st, S, legH, bodyH, color, accent, skin){
       ctx.closePath();
       ctx.fill();
     }
-    // Доспех легионера
     if (st === 'legionary'){
       ctx.fillStyle = '#8b8b8b';
       ctx.beginPath();
@@ -2694,7 +2642,6 @@ function drawTorsoDetails(st, S, legH, bodyH, color, accent, skin){
     }
   }
   else if (st === 'demon' || st === 'dark'){
-    // Рваный плащ
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.moveTo(-11*S, topY + 1*S);
@@ -2707,7 +2654,6 @@ function drawTorsoDetails(st, S, legH, bodyH, color, accent, skin){
     ctx.fillRect(-8*S, topY + 1*S, 16*S, 4*S);
     ctx.fillStyle = accent;
     ctx.fillRect(-11*S, botY - 3*S, 22*S, 2*S);
-    // Крылья для демона
     if (st === 'demon'){
       ctx.fillStyle = 'rgba(20,0,0,0.7)';
       ctx.beginPath();
@@ -2743,7 +2689,6 @@ function drawTorsoDetails(st, S, legH, bodyH, color, accent, skin){
     ctx.fill();
   }
   else if (st === 'witch' || st === 'guest'){
-    // Платье
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.moveTo(-9*S, topY + 2*S);
@@ -2761,7 +2706,6 @@ function drawTorsoDetails(st, S, legH, bodyH, color, accent, skin){
     ctx.lineTo(0, topY + 6*S);
     ctx.closePath();
     ctx.fill();
-    // Корсет для ведьмы
     if (st === 'witch'){
       ctx.fillStyle = '#1a0a2a';
       ctx.fillRect(-7*S, topY + 4*S, 14*S, 6*S);
@@ -2770,7 +2714,6 @@ function drawTorsoDetails(st, S, legH, bodyH, color, accent, skin){
     }
   }
   else if (st === 'koroviev'){
-    // Клетчатый костюм
     ctx.fillStyle = color;
     ctx.fillRect(-10*S, topY + 1*S, 20*S, bodyH - 1*S);
     ctx.strokeStyle = 'rgba(201,162,39,0.5)';
@@ -2811,12 +2754,10 @@ function drawTorsoDetails(st, S, legH, bodyH, color, accent, skin){
     ctx.lineTo(-12*S, botY + 4*S);
     ctx.closePath();
     ctx.fill();
-    // Размытые края
     ctx.fillStyle = 'rgba(74,74,106,0.3)';
     ctx.fillRect(-12*S, topY + 4*S, 24*S, bodyH - 6*S);
   }
   else if (st === 'ghost'){
-    // Полупрозрачный торс
     ctx.fillStyle = 'rgba(42,58,90,0.5)';
     ctx.beginPath();
     ctx.moveTo(-10*S, topY + 2*S);
@@ -2825,7 +2766,6 @@ function drawTorsoDetails(st, S, legH, bodyH, color, accent, skin){
     ctx.lineTo(-11*S, botY);
     ctx.closePath();
     ctx.fill();
-    // Внутреннее свечение
     ctx.fillStyle = 'rgba(96,165,250,0.15)';
     ctx.beginPath();
     ctx.arc(0, topY + bodyH*0.5, 6*S, 0, Math.PI*2);
@@ -2842,7 +2782,6 @@ function drawTorsoDetails(st, S, legH, bodyH, color, accent, skin){
     ctx.lineTo(-4*S, botY);
     ctx.closePath();
     ctx.fill();
-    // Зеркальный отблеск
     ctx.fillStyle = 'rgba(255,255,255,0.15)';
     ctx.beginPath();
     ctx.moveTo(-10*S, topY + 1*S);
@@ -2855,7 +2794,6 @@ function drawTorsoDetails(st, S, legH, bodyH, color, accent, skin){
   else if (st === 'rider'){
     ctx.fillStyle = color;
     ctx.fillRect(-10*S, topY + 1*S, 20*S, bodyH - 1*S);
-    // Плащ развевается
     ctx.fillStyle = 'rgba(139,0,0,0.6)';
     ctx.beginPath();
     ctx.moveTo(-10*S, topY + 2*S);
@@ -2864,7 +2802,6 @@ function drawTorsoDetails(st, S, legH, bodyH, color, accent, skin){
     ctx.lineTo(-10*S, botY);
     ctx.closePath();
     ctx.fill();
-    // Ремни
     ctx.strokeStyle = '#1a0a0a';
     ctx.lineWidth = 1.5*S;
     ctx.beginPath();
@@ -2880,7 +2817,6 @@ function drawTorsoDetails(st, S, legH, bodyH, color, accent, skin){
    ДЕТАЛИ ГОЛОВЫ — уникальные для каждого типа
    ============================================================ */
 function drawHeadDetails(st, S, headY, headR, hair, accent, color, type){
-  // Волосы / шляпы
   if (st === 'dress' || st === 'witch' || st === 'guest'){
     ctx.fillStyle = hair;
     ctx.beginPath();
@@ -2904,7 +2840,6 @@ function drawHeadDetails(st, S, headY, headR, hair, accent, color, type){
     ctx.lineTo(headR - 2*S, headY - 6*S);
     ctx.fill();
   } else if (st === 'demon'){
-    // Рога
     ctx.fillStyle = '#8b0000';
     ctx.beginPath();
     ctx.moveTo(-headR*0.7, headY - headR*0.8);
@@ -2917,7 +2852,6 @@ function drawHeadDetails(st, S, headY, headR, hair, accent, color, type){
     ctx.lineTo(headR*0.2, headY - headR*1);
     ctx.fill();
   } else if (st === 'dark'){
-    // Корона тьмы
     ctx.fillStyle = accent;
     ctx.globalAlpha = 0.7;
     for (let i = -2; i <= 2; i++){
@@ -2929,7 +2863,6 @@ function drawHeadDetails(st, S, headY, headR, hair, accent, color, type){
     }
     ctx.globalAlpha = 1;
   } else if (st === 'cat'){
-    // Кошачьи уши
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.moveTo(-headR*0.9, headY - headR*0.6);
@@ -2941,7 +2874,6 @@ function drawHeadDetails(st, S, headY, headR, hair, accent, color, type){
     ctx.lineTo(headR*1.3, headY - headR*1.6);
     ctx.lineTo(headR*0.3, headY - headR*0.9);
     ctx.fill();
-    // Внутренние уши
     ctx.fillStyle = '#8b3a3a';
     ctx.beginPath();
     ctx.moveTo(-headR*0.8, headY - headR*0.7);
@@ -2953,7 +2885,6 @@ function drawHeadDetails(st, S, headY, headR, hair, accent, color, type){
     ctx.lineTo(headR*1.1, headY - headR*1.3);
     ctx.lineTo(headR*0.4, headY - headR*0.9);
     ctx.fill();
-    // Усы
     ctx.strokeStyle = '#c9a227';
     ctx.lineWidth = 0.8*S;
     for (let i = -1; i <= 1; i++){
@@ -2967,7 +2898,6 @@ function drawHeadDetails(st, S, headY, headR, hair, accent, color, type){
       ctx.stroke();
     }
   } else if (st === 'ghost'){
-    // Призрачный капюшон
     ctx.fillStyle = 'rgba(42,58,90,0.6)';
     ctx.beginPath();
     ctx.arc(0, headY - 1*S, headR + 3*S, Math.PI, 0);
@@ -3002,7 +2932,6 @@ function drawHeadDetails(st, S, headY, headR, hair, accent, color, type){
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
     ctx.fillRect(-headR*0.5, headY - headR - 1*S, headR*0.4, 1.5*S);
   } else if (st === 'witch'){
-    // Ведьминская шляпа
     ctx.fillStyle = '#1a0a2a';
     ctx.beginPath();
     ctx.moveTo(-headR - 4*S, headY - headR);
@@ -3016,7 +2945,6 @@ function drawHeadDetails(st, S, headY, headR, hair, accent, color, type){
     ctx.fillStyle = accent;
     ctx.fillRect(-2*S, headY - headR - 5*S, 4*S, 2*S);
   } else if (st === 'koroviev'){
-    // Пенсне
     ctx.fillStyle = '#1a1a1a';
     ctx.beginPath();
     ctx.arc(0, headY - headR, headR*1.1, Math.PI, 0);
@@ -3033,7 +2961,6 @@ function drawHeadDetails(st, S, headY, headR, hair, accent, color, type){
     ctx.lineTo(-headR*0.3 - 3*S, headY - 1*S);
     ctx.stroke();
   } else if (st === 'guest'){
-    // Маска
     ctx.fillStyle = '#1a0a2a';
     ctx.beginPath();
     ctx.ellipse(0, headY - 1*S, headR*0.9, headR*0.6, 0, 0, Math.PI*2);
@@ -3044,7 +2971,6 @@ function drawHeadDetails(st, S, headY, headR, hair, accent, color, type){
     ctx.ellipse(-headR*0.35, headY - 1*S, 2*S, 1.2*S, 0, 0, Math.PI*2);
     ctx.fill();
   } else if (st === 'rider'){
-    // Шлем всадника
     ctx.fillStyle = '#2a1a0a';
     ctx.beginPath();
     ctx.arc(0, headY - 1*S, headR + 2*S, Math.PI, 0);
@@ -3052,13 +2978,11 @@ function drawHeadDetails(st, S, headY, headR, hair, accent, color, type){
     ctx.fillStyle = '#8b0000';
     ctx.fillRect(-1*S, headY - headR - 8*S, 2*S, 8*S);
   } else if (st === 'shadow'){
-    // Размытая тень вместо лица
     ctx.fillStyle = 'rgba(74,74,106,0.4)';
     ctx.beginPath();
     ctx.arc(0, headY, headR + 2*S, 0, Math.PI*2);
     ctx.fill();
   } else if (st === 'double'){
-    // Зеркальная маска
     ctx.fillStyle = 'rgba(255,255,255,0.2)';
     ctx.beginPath();
     ctx.moveTo(-headR, headY - headR);
@@ -3069,423 +2993,6 @@ function drawHeadDetails(st, S, headY, headR, hair, accent, color, type){
     ctx.fill();
   }
 
-  // Дополнительные детали для римлян
-  if (st === 'roman'){
-    ctx.fillStyle = '#2a4a1a';
-    for (let i = -3; i <= 3; i++){
-      ctx.beginPath();
-      ctx.ellipse(i*3*S, headY - headR + 2*S, 2.5*S, 1.2*S, i*0.2, 0, Math.PI*2);
-      ctx.fill();
-    }
-  }
-  if (st === 'dress'){
-    ctx.fillStyle = '#e8c547';
-    ctx.beginPath();
-    ctx.moveTo(-headR*0.7, headY - headR + 2*S);
-    ctx.lineTo(-headR*0.4, headY - headR - 4*S);
-    ctx.lineTo(-headR*0.1, headY - headR + 2*S);
-    ctx.lineTo(headR*0.2, headY - headR - 5*S);
-    ctx.lineTo(headR*0.5, headY - headR + 2*S);
-    ctx.lineTo(headR*0.8, headY - headR - 3*S);
-    ctx.lineTo(headR*0.9, headY - headR + 2*S);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(0, headY - headR - 3*S, 1.5*S, 0, Math.PI*2);
-    ctx.fill();
-  }
-}
-
-function drawTorsoDetails(st, S, legH, bodyH, color, accent, skin){
-  const topY = -legH - bodyH;
-  const botY = -legH;
-
-  if (st === 'suit' || st === 'tuxedo' || st === 'master'){
-    ctx.fillStyle = '#f0ead0';
-    ctx.beginPath();
-    ctx.moveTo(-3*S, topY);
-    ctx.lineTo(3*S, topY);
-    ctx.lineTo(4*S, botY);
-    ctx.lineTo(-4*S, botY);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = accent;
-    ctx.beginPath();
-    ctx.moveTo(0, topY + 2*S);
-    ctx.lineTo(2*S, topY + 4*S);
-    ctx.lineTo(0, botY - 2*S);
-    ctx.lineTo(-2*S, topY + 4*S);
-    ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.5*S;
-    ctx.beginPath();
-    ctx.moveTo(-3*S, topY + 1*S);
-    ctx.lineTo(-5*S, topY + 8*S);
-    ctx.moveTo(3*S, topY + 1*S);
-    ctx.lineTo(5*S, topY + 8*S);
-    ctx.stroke();
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(-10*S, botY - 3*S, 20*S, 2.5*S);
-    ctx.fillStyle = accent;
-    ctx.beginPath();
-    ctx.arc(0, topY + 8*S, 1*S, 0, Math.PI*2);
-    ctx.fill();
-  }
-  else if (st === 'peasant'){
-    ctx.fillStyle = '#f0ead0';
-    ctx.fillRect(-9*S, topY, 18*S, 3*S);
-    ctx.fillStyle = accent;
-    ctx.fillRect(-9*S, topY, 18*S, 2*S);
-    ctx.fillStyle = '#8b0000';
-    ctx.fillRect(-10*S, botY - 4*S, 20*S, 3*S);
-    ctx.fillStyle = accent;
-    for (let i = 0; i < 4; i++){
-      ctx.fillRect(-6*S + i*4*S, topY + 6*S, 1.5*S, 4*S);
-    }
-  }
-  else if (st === 'dress'){
-    ctx.fillStyle = skin;
-    ctx.beginPath();
-    ctx.moveTo(-3*S, topY);
-    ctx.lineTo(3*S, topY);
-    ctx.lineTo(4*S, topY + 4*S);
-    ctx.lineTo(-4*S, topY + 4*S);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = accent;
-    ctx.beginPath();
-    ctx.arc(0, topY + 5*S, 2*S, 0, Math.PI);
-    ctx.fill();
-    ctx.fillStyle = accent;
-    ctx.fillRect(-10*S, botY - 4*S, 20*S, 2*S);
-    ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-    ctx.lineWidth = 1*S;
-    for (let i = -2; i <= 2; i++){
-      ctx.beginPath();
-      ctx.moveTo(i*3*S, botY - 2*S);
-      ctx.lineTo(i*3*S, botY + 2*S);
-      ctx.stroke();
-    }
-  }
-  else if (st === 'roman' || st === 'legionary'){
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(-10*S, topY + 2*S);
-    ctx.lineTo(10*S, topY + 2*S);
-    ctx.lineTo(11*S, botY);
-    ctx.lineTo(-11*S, botY);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = '#8b6914';
-    ctx.fillRect(-10*S, botY - 4*S, 20*S, 3*S);
-    ctx.fillStyle = '#c9a227';
-    for (let i = -3; i <= 3; i++){
-      ctx.fillRect(i*2.5*S - 1*S, botY - 4*S, 2*S, 3*S);
-    }
-    if (st === 'roman'){
-      ctx.fillStyle = 'rgba(139,0,0,0.6)';
-      ctx.beginPath();
-      ctx.moveTo(-11*S, topY + 2*S);
-      ctx.lineTo(-14*S, botY + 5*S);
-      ctx.lineTo(14*S, botY + 5*S);
-      ctx.lineTo(11*S, topY + 2*S);
-      ctx.closePath();
-      ctx.fill();
-    }
-  }
-  else if (st === 'demon' || st === 'dark'){
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(-11*S, topY + 1*S);
-    ctx.lineTo(11*S, topY + 1*S);
-    ctx.lineTo(13*S, botY + 3*S);
-    ctx.lineTo(-13*S, botY + 3*S);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = 'rgba(0,0,0,0.4)';
-    ctx.fillRect(-8*S, topY + 1*S, 16*S, 4*S);
-    ctx.fillStyle = accent;
-    ctx.fillRect(-11*S, botY - 3*S, 22*S, 2*S);
-  }
-  else if (st === 'cat'){
-    ctx.fillStyle = '#2a2a2a';
-    ctx.fillRect(-9*S, topY + 2*S, 18*S, bodyH - 4*S);
-    ctx.fillStyle = accent;
-    for (let i = 0; i < 3; i++){
-      ctx.beginPath();
-      ctx.arc(0, topY + 6*S + i*5*S, 1*S, 0, Math.PI*2);
-      ctx.fill();
-    }
-    ctx.fillStyle = '#8b0000';
-    ctx.beginPath();
-    ctx.moveTo(0, topY + 3*S);
-    ctx.lineTo(3*S, topY + 5*S);
-    ctx.lineTo(0, topY + 7*S);
-    ctx.lineTo(-3*S, topY + 5*S);
-    ctx.closePath();
-    ctx.fill();
-  }
-  else if (st === 'witch' || st === 'guest'){
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(-9*S, topY + 2*S);
-    ctx.lineTo(9*S, topY + 2*S);
-    ctx.lineTo(12*S, botY + 2*S);
-    ctx.lineTo(-12*S, botY + 2*S);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = accent;
-    ctx.fillRect(-9*S, botY - 4*S, 18*S, 2*S);
-    ctx.fillStyle = skin;
-    ctx.beginPath();
-    ctx.moveTo(-3*S, topY + 2*S);
-    ctx.lineTo(3*S, topY + 2*S);
-    ctx.lineTo(0, topY + 6*S);
-    ctx.closePath();
-    ctx.fill();
-  }
-  else if (st === 'koroviev'){
-    ctx.fillStyle = color;
-    ctx.fillRect(-10*S, topY + 1*S, 20*S, bodyH - 1*S);
-    ctx.strokeStyle = 'rgba(201,162,39,0.4)';
-    ctx.lineWidth = 0.8*S;
-    for (let i = 0; i < 4; i++){
-      ctx.beginPath();
-      ctx.moveTo(-10*S, topY + 4*S + i*4*S);
-      ctx.lineTo(10*S, topY + 4*S + i*4*S);
-      ctx.stroke();
-    }
-    ctx.fillStyle = '#8b0000';
-    ctx.fillRect(4*S, topY + 4*S, 3*S, 2*S);
-  }
-  else if (st === 'citizen'){
-    ctx.fillStyle = color;
-    ctx.fillRect(-10*S, topY + 1*S, 20*S, bodyH - 1*S);
-    ctx.fillStyle = accent;
-    for (let i = 0; i < 3; i++){
-      ctx.beginPath();
-      ctx.arc(0, topY + 5*S + i*5*S, 1*S, 0, Math.PI*2);
-      ctx.fill();
-    }
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(-8*S, topY + 1*S, 16*S, 2*S);
-  }
-  else if (st === 'shadow'){
-    ctx.fillStyle = 'rgba(26,26,42,0.7)';
-    ctx.beginPath();
-    ctx.moveTo(-10*S, topY + 2*S);
-    ctx.lineTo(10*S, topY + 2*S);
-    ctx.lineTo(12*S, botY + 4*S);
-    ctx.lineTo(-12*S, botY + 4*S);
-    ctx.closePath();
-    ctx.fill();
-  }
-  else if (st === 'ghost'){
-    ctx.fillStyle = 'rgba(42,58,90,0.7)';
-    ctx.beginPath();
-    ctx.moveTo(-10*S, topY + 2*S);
-    ctx.lineTo(10*S, topY + 2*S);
-    ctx.lineTo(11*S, botY);
-    ctx.lineTo(-11*S, botY);
-    ctx.closePath();
-    ctx.fill();
-  }
-  else if (st === 'double'){
-    ctx.fillStyle = color;
-    ctx.fillRect(-10*S, topY + 1*S, 20*S, bodyH - 1*S);
-    ctx.fillStyle = '#f0ead0';
-    ctx.beginPath();
-    ctx.moveTo(-3*S, topY + 1*S);
-    ctx.lineTo(3*S, topY + 1*S);
-    ctx.lineTo(4*S, botY);
-    ctx.lineTo(-4*S, botY);
-    ctx.closePath();
-    ctx.fill();
-  }
-  else if (st === 'rider'){
-    ctx.fillStyle = color;
-    ctx.fillRect(-10*S, topY + 1*S, 20*S, bodyH - 1*S);
-    ctx.fillStyle = 'rgba(139,0,0,0.5)';
-    ctx.beginPath();
-    ctx.moveTo(-10*S, topY + 2*S);
-    ctx.lineTo(-16*S, topY + 10*S);
-    ctx.lineTo(-14*S, botY + 5*S);
-    ctx.lineTo(-10*S, botY);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = accent;
-    ctx.fillRect(-10*S, botY - 3*S, 20*S, 2*S);
-  }
-}
-
-function drawHeadDetails(st, S, headY, headR, hair, accent, color, type){
-  ctx.fillStyle = hair;
-  if (st === 'dress' || st === 'witch' || st === 'guest'){
-    ctx.beginPath();
-    ctx.arc(0, headY - 2*S, headR + 2*S, Math.PI, 0);
-    ctx.fill();
-    ctx.fillRect(-headR - 2*S, headY - 2*S, 4*S, headR + 8*S);
-    ctx.fillRect(headR - 2*S, headY - 2*S, 4*S, headR + 8*S);
-  } else if (st === 'peasant'){
-    ctx.beginPath();
-    ctx.arc(0, headY - 3*S, headR + 1*S, Math.PI, 0);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(-headR, headY - 3*S);
-    ctx.lineTo(-headR - 4*S, headY - 8*S);
-    ctx.lineTo(-headR + 2*S, headY - 6*S);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(headR, headY - 3*S);
-    ctx.lineTo(headR + 4*S, headY - 9*S);
-    ctx.lineTo(headR - 2*S, headY - 6*S);
-    ctx.fill();
-  } else if (st === 'demon' || st === 'dark'){
-  } else if (st === 'cat'){
-    ctx.fillStyle = hair;
-    ctx.beginPath();
-    ctx.moveTo(-headR*0.9, headY - headR*0.6);
-    ctx.lineTo(-headR*1.3, headY - headR*1.5);
-    ctx.lineTo(-headR*0.3, headY - headR*0.9);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(headR*0.9, headY - headR*0.6);
-    ctx.lineTo(headR*1.3, headY - headR*1.5);
-    ctx.lineTo(headR*0.3, headY - headR*0.9);
-    ctx.fill();
-    ctx.fillStyle = '#8b3a3a';
-    ctx.beginPath();
-    ctx.moveTo(-headR*0.8, headY - headR*0.7);
-    ctx.lineTo(-headR*1.1, headY - headR*1.3);
-    ctx.lineTo(-headR*0.4, headY - headR*0.9);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(headR*0.8, headY - headR*0.7);
-    ctx.lineTo(headR*1.1, headY - headR*1.3);
-    ctx.lineTo(headR*0.4, headY - headR*0.9);
-    ctx.fill();
-    ctx.strokeStyle = '#c9a227';
-    ctx.lineWidth = 0.8*S;
-    for (let i = -1; i <= 1; i++){
-      ctx.beginPath();
-      ctx.moveTo(headR*0.5, headY + headR*0.3 + i*2*S);
-      ctx.lineTo(headR*1.8, headY + headR*0.1 + i*4*S);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(-headR*0.5, headY + headR*0.3 + i*2*S);
-      ctx.lineTo(-headR*1.8, headY + headR*0.1 + i*4*S);
-      ctx.stroke();
-    }
-  } else {
-    ctx.beginPath();
-    ctx.arc(0, headY - 3*S, headR + 1*S, Math.PI, 0);
-    ctx.fill();
-  }
-
-  if (st === 'suit' || st === 'citizen' || st === 'master'){
-    ctx.fillStyle = '#1a1a1a';
-    ctx.beginPath();
-    ctx.ellipse(0, headY - headR - 1*S, headR + 5*S, 2.5*S, 0, 0, Math.PI*2);
-    ctx.fill();
-    ctx.fillRect(-headR*0.8, headY - headR - 8*S, headR*1.6, 8*S);
-    ctx.fillStyle = accent;
-    ctx.fillRect(-headR*0.8, headY - headR - 4*S, headR*1.6, 1.5*S);
-  }
-  if (st === 'tuxedo'){
-    ctx.fillStyle = '#0a0a0a';
-    ctx.beginPath();
-    ctx.ellipse(0, headY - headR - 1*S, headR + 4*S, 2*S, 0, 0, Math.PI*2);
-    ctx.fill();
-    ctx.fillRect(-headR*0.7, headY - headR - 16*S, headR*1.4, 15*S);
-    ctx.fillStyle = accent;
-    ctx.fillRect(-headR*0.7, headY - headR - 5*S, headR*1.4, 2*S);
-    ctx.fillStyle = 'rgba(255,255,255,0.15)';
-    ctx.fillRect(-headR*0.4, headY - headR - 15*S, 1.5*S, 13*S);
-  }
-  if (st === 'demon' || st === 'dark'){
-    ctx.fillStyle = '#8b0000';
-    ctx.beginPath();
-    ctx.moveTo(-headR*0.7, headY - headR*0.8);
-    ctx.lineTo(-headR*1.1, headY - headR*2);
-    ctx.lineTo(-headR*0.3, headY - headR*1);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(headR*0.7, headY - headR*0.8);
-    ctx.lineTo(headR*1.1, headY - headR*2);
-    ctx.lineTo(headR*0.3, headY - headR*1);
-    ctx.fill();
-    ctx.fillStyle = '#ff3333';
-    ctx.beginPath();
-    ctx.arc(headR*0.4, headY - 1*S, 1.8*S, 0, Math.PI*2);
-    ctx.arc(-headR*0.3, headY - 1*S, 1.8*S, 0, Math.PI*2);
-    ctx.fill();
-  }
-  if (st === 'legionary' || st === 'rider' || st === 'roman'){
-    ctx.fillStyle = '#c9a227';
-    ctx.beginPath();
-    ctx.arc(0, headY - 2*S, headR + 2*S, Math.PI, 0);
-    ctx.fill();
-    ctx.fillRect(-headR - 2*S, headY - 1*S, 3*S, headR*0.9);
-    ctx.fillRect(headR - 1*S, headY - 1*S, 3*S, headR*0.9);
-    ctx.fillStyle = '#8b0000';
-    ctx.fillRect(-1.5*S, headY - headR - 14*S, 3*S, 14*S);
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.fillRect(-headR*0.5, headY - headR - 1*S, headR*0.4, 1.5*S);
-  }
-  if (st === 'witch'){
-    ctx.fillStyle = '#1a0a2a';
-    ctx.beginPath();
-    ctx.moveTo(-headR - 4*S, headY - headR);
-    ctx.lineTo(headR + 4*S, headY - headR);
-    ctx.lineTo(headR*0.3, headY - headR - 16*S);
-    ctx.closePath();
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(0, headY - headR, headR + 6*S, 2.5*S, 0, 0, Math.PI*2);
-    ctx.fill();
-    ctx.fillStyle = accent;
-    ctx.fillRect(-2*S, headY - headR - 5*S, 4*S, 2*S);
-  }
-  if (st === 'koroviev'){
-    ctx.fillStyle = '#1a1a1a';
-    ctx.beginPath();
-    ctx.arc(0, headY - headR, headR*1.1, Math.PI, 0);
-    ctx.fill();
-    ctx.fillRect(-headR*1.1, headY - headR, headR*2.2, 2*S);
-    ctx.strokeStyle = '#c9a227';
-    ctx.lineWidth = 1*S;
-    ctx.beginPath();
-    ctx.arc(headR*0.35, headY - 1*S, 3*S, 0, Math.PI*2);
-    ctx.arc(-headR*0.3, headY - 1*S, 3*S, 0, Math.PI*2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(headR*0.35 + 3*S, headY - 1*S);
-    ctx.lineTo(-headR*0.3 - 3*S, headY - 1*S);
-    ctx.stroke();
-  }
-  if (st === 'guest'){
-    ctx.fillStyle = '#1a0a2a';
-    ctx.beginPath();
-    ctx.ellipse(0, headY - 1*S, headR*0.9, headR*0.6, 0, 0, Math.PI*2);
-    ctx.fill();
-    ctx.fillStyle = '#e8c547';
-    ctx.beginPath();
-    ctx.ellipse(headR*0.35, headY - 1*S, 2*S, 1.2*S, 0, 0, Math.PI*2);
-    ctx.ellipse(-headR*0.35, headY - 1*S, 2*S, 1.2*S, 0, 0, Math.PI*2);
-    ctx.fill();
-  }
-  if (st === 'peasant'){
-    ctx.fillStyle = '#3a3a3a';
-    ctx.beginPath();
-    ctx.arc(0, headY - 2*S, headR + 1*S, Math.PI, 0);
-    ctx.fill();
-    ctx.fillStyle = '#2a2a2a';
-    ctx.beginPath();
-    ctx.ellipse(headR*0.6, headY - headR*0.5, headR*0.9, 2*S, -0.2, 0, Math.PI*2);
-    ctx.fill();
-  }
   if (st === 'roman'){
     ctx.fillStyle = '#2a4a1a';
     for (let i = -3; i <= 3; i++){
@@ -3594,6 +3101,7 @@ function gameLoop(t){
   }
 
   processBookRespawns(dt);
+  processEnemyRespawns(dt);
 
   if (state.dialogActive && justPressed['Enter']) nextDialog();
 
